@@ -380,6 +380,25 @@ function renderPsychology() {
     renderBookViewer("心理本", "📓", "我们的心理课堂记忆", "pages_psych", 168);
 }
 
+
+/* ===== 编者有话说 ===== */
+function renderEditor() {
+    content.innerHTML =
+        '<div class="editor-view">' +
+        '<div class="editor-card">' +
+        '<h1>💭 编者有话说</h1>' +
+        '<div class="editor-text">' +
+        '<p>前几天王牧歌问我高中三年就这么过去了，你没有啥感慨吗，但是我没太在意，主要是刷视频来劲了。</p>' +
+        '<p>之后，过了两三天接连碰到倒霉事，emo上了，就开始回味。突然就想整一个纪念高中三年，于是这个网站就诞生了。</p>' +
+        '<p>除了高中故事之外，其他的都需要加载，手机可能会更快一些，请耐心等待。那些东西大家基本也都有，我只不过是整理了一下。</p>' +
+        '<p>网站里的东西如果有冒犯，请您联系我，我会立刻删除修改。如果您有想添加的也可以联系我，主界面就有我的联系方式。</p>' +
+        '<p>祝大家以后的日子，学业有成，天天开心。也希望大家毕业后，也别忘了大家一起经历的事，常联系。</p>' +
+        '<div class="editor-signature">2026.7.27</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+}
+
 /* ================================================ */
 /* ===== 切换板块 ===== */
 /* ================================================ */
@@ -420,8 +439,56 @@ function switchSection(section) {
         case 'essays':
             renderEssays();
             break;
+        case 'editor':
+            renderEditor();
+            break;
 
     }
+}
+
+
+
+/* ===== 欢迎弹窗 ===== */
+function showWelcome() {
+    // 检查是否已经看过（session内）
+    if (sessionStorage.getItem("welcomeShown")) return;
+
+    var overlay = document.createElement("div");
+    overlay.className = "welcome-overlay";
+    overlay.id = "welcomeOverlay";
+
+    overlay.innerHTML =
+        '<div class="welcome-modal">' +
+        '<button class="welcome-close" id="welcomeClose">✕</button>' +
+        '<h2>💭 编者有话说</h2>' +
+        '<div class="welcome-text">' +
+        '<p>前几天王牧歌问我高中三年就这么过去了，你没有啥感慨吗，但是我没太在意，主要是刷视频来劲了。</p>' +
+        '<p>之后，过了两三天接连碰到倒霉事，emo上了，就开始回味。突然就想整一个纪念高中三年，于是这个网站就诞生了。</p>' +
+        '<p>除了高中故事之外，其他的都需要加载，手机可能会更快一些，请耐心等待。那些东西大家基本也都有，我只不过是整理了一下。</p>' +
+        '<p>网站里的东西如果有冒犯，请您联系我，我会立刻删除修改。如果您有想添加的也可以联系我，主界面就有我的联系方式。</p>' +
+        '<p>祝大家以后的日子，学业有成，天天开心。也希望大家毕业后，也别忘了大家一起经历的事，常联系。</p>' +
+        '<div class="welcome-signature">2026.7.27</div>' +
+        '</div>' +
+        '<button class="welcome-btn" id="welcomeBtn">我知道了，开始浏览</button>' +
+        '</div>';
+
+    document.body.appendChild(overlay);
+
+    function closeWelcome() {
+        var el = document.getElementById("welcomeOverlay");
+        if (el) document.body.removeChild(el);
+        sessionStorage.setItem("welcomeShown", "1");
+    }
+
+    setTimeout(function() {
+        var btn = document.getElementById("welcomeBtn");
+        var close = document.getElementById("welcomeClose");
+        if (btn) btn.addEventListener("click", closeWelcome);
+        if (close) close.addEventListener("click", closeWelcome);
+        overlay.addEventListener("click", function(e) {
+            if (e.target === overlay) closeWelcome();
+        });
+    }, 50);
 }
 
 /* ===== 更新子菜单高亮 ===== */
@@ -632,6 +699,7 @@ document.addEventListener('keydown', function(e) {
 
 /* ===== 启动 ===== */
 switchSection('stories');
+showWelcome();
 
 console.log('📖 三年记忆 · 高中纪念网站已加载');
 var total = flattenStories().length;
