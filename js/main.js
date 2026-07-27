@@ -329,24 +329,34 @@ function renderBookViewer(title, icon, desc, pageDir, totalPages) {
 
     content.innerHTML = buildViewer(currentPage);
 
-    function goToPage(n) {
-        if (n < 1 || n > totalPages) return;
-        currentPage = n;
-        var img = document.getElementById("bkImg");
-        if (img) {
-            img.style.opacity = "0";
-            setTimeout(function() {
-                img.src = pageDir + "/page_" + String(n).padStart(3, "0") + ".jpg";
-                img.style.opacity = "1";
-                var p = document.getElementById("bkPrev");
-                var nx = document.getElementById("bkNext");
-                if (p) p.disabled = n <= 1;
-                if (nx) nx.disabled = n >= totalPages;
-                var num = document.querySelector(".book-page-num");
-                if (num) num.textContent = n + " / " + totalPages;
-            }, 150);
-        }
-    }
+   function goToPage(n) {
+       if (n < 1 || n > totalPages) return;
+       currentPage = n;
+       var img = document.getElementById("bkImg");
+       if (img) {
+           img.style.opacity = "0";
+           setTimeout(function() {
+               img.src = pageDir + "/page_" + String(n).padStart(3, "0") + ".jpg";
+               img.style.opacity = "1";
+               var p = document.getElementById("bkPrev");
+               var nx = document.getElementById("bkNext");
+               if (p) p.disabled = n <= 1;
+               if (nx) nx.disabled = n >= totalPages;
+               var num = document.querySelector(".book-page-num");
+               if (num) num.textContent = n + " / " + totalPages;
+                // 预加载下一页
+                if (n < totalPages) {
+                    var nextImg = new Image();
+                    nextImg.src = pageDir + "/page_" + String(n + 1).padStart(3, "0") + ".jpg";
+                }
+                // 预加载上一页
+                if (n > 1) {
+                    var prevImg = new Image();
+                    prevImg.src = pageDir + "/page_" + String(n - 1).padStart(3, "0") + ".jpg";
+                }
+           }, 150);
+       }
+   }
 
     setTimeout(function() {
         var pBtn = document.getElementById("bkPrev");
@@ -652,4 +662,3 @@ function renderYearbook() {
 function renderEssays() {
     renderBookViewer("高一作文集", "📝", "共36页", "pages_essays", 36);
 }
-
