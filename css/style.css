@@ -1009,3 +1009,139 @@ body {
     border-left: 3px solid #b8860b;
 }
 @@
+/* ===== 编者有话说 ===== */
+.editor-view {
+    display: flex;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+    padding-top: 20px;
+}
+
+.editor-card {
+    max-width: 640px;
+    width: 100%;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 36px 40px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 24px var(--shadow);
+}
+
+.editor-card h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+.editor-text p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: #3a3a3a;
+    margin-bottom: 14px;
+    text-indent: 2em;
+}
+
+.editor-signature {
+    text-align: right;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    margin-top: 24px;
+    letter-spacing: 1px;
+}
+
+/* ===== 欢迎弹窗 ===== */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+    padding: 20px;
+}
+
+.welcome-modal {
+    background: #fff;
+    border-radius: 14px;
+    max-width: 580px;
+    width: 100%;
+    padding: 36px 32px 28px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.welcome-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.welcome-close:hover {
+    background: var(--border);
+}
+
+.welcome-modal h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+}
+
+.welcome-text p {
+    font-size: 0.92rem;
+    line-height: 1.85;
+    color: #3a3a3a;
+    margin-bottom: 12px;
+    text-indent: 2em;
+}
+
+.welcome-signature {
+    text-align: right;
+    color: var(--text-light);
+    font-size: 0.85rem;
+    margin-top: 16px;
+}
+
+.welcome-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.welcome-btn:hover {
+    background: var(--primary-light);
+}
+
+@media (max-width: 768px) {
+    .editor-card {
+        padding: 24px 20px;
+    }
+    .welcome-modal {
+        padding: 28px 20px 24px;
+    }
+}
+@@
