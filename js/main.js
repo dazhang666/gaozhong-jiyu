@@ -1,0 +1,621 @@
+/* ===== 数据 ===== */
+var storiesData = window.storiesData || {};
+var categories = storiesData;
+
+// 展平所有故事（用于列表和搜索）
+function flattenStories() {
+    var all = [];
+    for (var key in categories) {
+        var cat = categories[key];
+        if (cat && cat.list) {
+            for (var i = 0; i < cat.list.length; i++) {
+                var s = cat.list[i];
+                s._category = key;
+                all.push(s);
+            }
+        }
+    }
+    return all;
+}
+
+// 获取某个分支下的所有故事
+function getBranchStories(branchKey) {
+    var cat = categories[branchKey];
+    if (!cat || !cat.list) return [];
+    var list = [];
+    for (var i = 0; i < cat.list.length; i++) {
+        var s = cat.list[i];
+        s._category = branchKey;
+        list.push(s);
+    }
+    return list;
+}
+
+/* ===== 状态 ===== */
+var state = {
+    currentSection: 'stories',
+    currentBranch: null,
+    searchQuery: '',
+};
+
+/* ===== DOM 引用 ===== */
+var $ = function(sel) { return document.querySelector(sel); };
+var content = $('#mainContent');
+var menuItems = document.querySelectorAll('.menu-item');
+var submenuItems = document.querySelectorAll('.submenu-item');
+var searchInput = $('#searchInput');
+var searchClear = $('#searchClear');
+var menuToggle = $('#menuToggle');
+var sidebar = $('#sidebar');
+
+/* ===== 工具 ===== */
+function escapeRegExp(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function getCategoryName(key) {
+    return categories[key] ? categories[key].name : '';
+}
+
+/* ================================================ */
+/* ===== 渲染：故事列表（全部或按分支过滤） ===== */
+/* ================================================ */
+function renderStoryList(opts) {
+    var branch = (opts && opts.branch) || null;
+    var query = (opts && opts.query) || '';
+
+    var allStories = branch ? getBranchStories(branch) : flattenStories();
+
+    if (query) {
+        var q = query.toLowerCase();
+        var filtered = [];
+        for (var i = 0; i < allStories.length; i++) {
+            var s = allStories[i];
+            if (s.title.toLowerCase().includes(q) ||
+                (s.content && s.content.toLowerCase().includes(q))) {
+                filtered.push(s);
+            }
+        }
+        allStories = filtered;
+    }
+
+    var titleText = '高中故事';
+    var descText = '那些年我们一起经历的点点滴滴';
+    var notice = '以下所有东西如有冒犯，请即刻联系我，我立马删除或修改。如果你有想加入的东西，也可以直接联系我。大家可微信联系我，或者邮箱联系195212681@qq.com。';
+
+    if (branch) {
+        var cat = categories[branch];
+        if (cat) titleText = (cat.icon || '') + ' ' + cat.name;
+    }
+    if (query) titleText = '🔍 搜索结果';
+
+    var html = '';
+    html += '<div class="section-header">';
+    if (branch) {
+        html += '<button class="back-link" id="backToAll">← 全部故事</button>';
+    }
+    html += '<h1>' + titleText + '</h1>';
+    if (query) {
+        html += '<p>包含 "' + query + '" 的故事</p>';
+    } else if (!branch) {
+        html += '<p>' + descText + '</p>';
+        html += '<p class="story-notice">' + notice + '</p>';
+    } else {
+        html += '<p>' + (categories[branch] ? categories[branch].description : '') + '</p>';
+        html += '<p class="story-notice">' + notice + '</p>';
+    }
+    html += '</div>';
+
+    html += '<div class="story-list">';
+    if (allStories.length === 0) {
+        html += '<div class="search-no-result">没有找到相关故事 🙈</div>';
+    } else {
+        for (var i = 0; i < allStories.length; i++) {
+            var s = allStories[i];
+            html += '<div class="story-item" data-id="' + s.id + '" data-branch="' + s._category + '">';
+            html += '<span class="story-title">' + s.title + '</span>';
+            if (!branch && s._category) {
+                var tagName = getCategoryName(s._category);
+                if (tagName) {
+                    html += '<span class="story-tag">' + tagName + '</span>';
+                }
+            }
+            html += '<span class="story-arrow">→</span>';
+            html += '</div>';
+        }
+    }
+    html += '</div>';
+
+    if (!query) {
+        html += '<div class="story-count">共 ' + allStories.length + ' 个故事</div>';
+    } else {
+        html += '<div class="story-count">找到 ' + allStories.length + ' 个结果</div>';
+    }
+
+    content.innerHTML = html;
+
+    // 返回全部按钮
+    var backBtn = $('#backToAll');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            state.currentBranch = null;
+            updateSubmenuActive(null);
+            renderStoryList();
+        });
+    }
+
+    // 绑定故事点击
+    var items = content.querySelectorAll('.story-item');
+    for (var i = 0; i < items.length; i++) {
+        (function(el) {
+            el.addEventListener('click', function() {
+                renderStoryDetail(el.dataset.id, el.dataset.branch);
+            });
+        })(items[i]);
+    }
+}
+
+/* ================================================ */
+/* ===== 渲染：故事详情 ===== */
+/* ================================================ */
+function renderStoryDetail(storyId, branchKey) {
+    var cat = categories[branchKey];
+    if (!cat) return;
+
+    var story = null;
+    for (var i = 0; i < cat.list.length; i++) {
+        if (cat.list[i].id === storyId) {
+            story = cat.list[i];
+            break;
+        }
+    }
+    if (!story) return;
+
+    var html = '';
+    html += '<div class="detail-view">';
+    html += '<div class="detail-header">';
+    html += '<button class="detail-back" id="backToList">';
+    html += '← 返回' + (state.currentBranch ? cat.name : '列表');
+    html += '</button>';
+    html += '<h2 class="detail-title">' + story.title + '</h2>';
+    html += '</div>';
+    html += '<div class="detail-content">';
+    html += story.content || '（暂无内容）';
+    html += '</div>';
+    html += '</div>';
+
+    content.innerHTML = html;
+
+    $('#backToList').addEventListener('click', function() {
+        if (state.currentBranch) {
+            renderStoryList({ branch: state.currentBranch });
+        } else {
+            renderStoryList();
+        }
+    });
+}
+
+/* ===== 纪念照 ===== */
+function renderPhotos() {
+    var photos = [
+        "照片1.jpg", "照片2.jpg", "照片3.jpg", "照片4.jpg",
+        "照片6.jpg", "照片7.jpg", "照片8.jpg",
+        "照片10.jpg", "照片11.jpg", "照片12.jpg"
+    ];
+
+    var html = "";
+    html += "<div class=\"section-header\">";
+    html += "<h1>📸 高中纪念照</h1>";
+    html += "<p class=\"photo-notice\">后两张是学姐拍的合集，扫描观看，不止包含咱们班。</p>";
+    html += '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>';
+    html += "</div>";
+    html += "<div class=\"photo-gallery\" id=\"photoGallery\">";
+
+    for (var i = 0; i < photos.length; i++) {
+        html += "<div class=\"photo-item\" data-index=\"" + i + "\">";
+        html += "<img class=\"photo-thumb\" src=\"" + photos[i] + "\" alt=\"纪念照" + (i + 1) + "\" loading=\"lazy\">";
+        html += "</div>";
+    }
+
+    html += "</div>";
+    content.innerHTML = html;
+
+    // 点击放大
+    var items = content.querySelectorAll(".photo-item");
+    for (var i = 0; i < items.length; i++) {
+        (function(idx) {
+            items[idx].addEventListener("click", function() {
+                openLightbox(photos, idx);
+            });
+        })(i);
+    }
+}
+
+/* ===== 照片灯箱 ===== */
+function openLightbox(photos, startIndex) {
+    var current = startIndex;
+    var overlay = document.createElement("div");
+    overlay.className = "lightbox-overlay";
+    overlay.id = "lightbox";
+
+    overlay.innerHTML =
+        "<button class=\"lightbox-close\" id=\"lbClose\">✕</button>" +
+        "<button class=\"lightbox-nav lightbox-prev\" id=\"lbPrev\">‹</button>" +
+        "<div class=\"lightbox-content\">" +
+        "<img class=\"lightbox-image\" id=\"lbImg\" src=\"" + photos[current] + "\" alt=\"\">" +
+        "<div class=\"lightbox-counter\" id=\"lbCounter\">" + (current + 1) + " / " + photos.length + "</div>" +
+        "</div>" +
+        "<button class=\"lightbox-nav lightbox-next\" id=\"lbNext\">›</button>";
+
+    document.body.appendChild(overlay);
+
+    function showImage(idx) {
+        if (idx < 0 || idx >= photos.length) return;
+        current = idx;
+        var img = document.getElementById("lbImg");
+        if (img) {
+            img.src = photos[current];
+        }
+        var counter = document.getElementById("lbCounter");
+        if (counter) {
+            counter.textContent = (current + 1) + " / " + photos.length;
+        }
+        var prev = document.getElementById("lbPrev");
+        var next = document.getElementById("lbNext");
+        if (prev) prev.style.display = current <= 0 ? "none" : "flex";
+        if (next) next.style.display = current >= photos.length - 1 ? "none" : "flex";
+    }
+
+    setTimeout(function() {
+        document.getElementById("lbClose").addEventListener("click", function() {
+            document.body.removeChild(overlay);
+        });
+        document.getElementById("lbPrev").addEventListener("click", function() {
+            showImage(current - 1);
+        });
+        document.getElementById("lbNext").addEventListener("click", function() {
+            showImage(current + 1);
+        });
+        showImage(current);
+    }, 50);
+
+    // 键盘支持
+    function keyHandler(e) {
+        if (e.key === "Escape") {
+            if (document.getElementById("lightbox")) {
+                document.body.removeChild(overlay);
+            }
+            document.removeEventListener("keydown", keyHandler);
+        }
+        if (e.key === "ArrowLeft") showImage(current - 1);
+        if (e.key === "ArrowRight") showImage(current + 1);
+    }
+    document.addEventListener("keydown", keyHandler);
+
+    overlay.addEventListener("click", function(e) {
+        if (e.target === overlay) {
+            document.body.removeChild(overlay);
+        }
+    });
+}
+
+/* ===== 心理本（占位） ===== */
+function renderPsychology() {
+    content.innerHTML =
+        '<div class="pdf-viewer">' +
+        '<div class="pdf-header">' +
+        '<h1>📓 心理本</h1>' +
+        '<p>我们的心理课堂记忆</p>' +
+        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
+        '</div>' +
+        '<div class="pdf-embed-wrapper">' +
+        '<iframe class="pdf-embed" src="心理本.pdf" title="心理本"></iframe>' +
+        '</div>' +
+        '</div>';
+}
+
+/* ================================================ */
+/* ===== 切换板块 ===== */
+/* ================================================ */
+function switchSection(section) {
+    state.currentSection = section;
+    state.currentBranch = null;
+    state.searchQuery = '';
+    searchInput.value = '';
+    searchClear.classList.remove('visible');
+    hideSuggestions();
+    updateSubmenuActive(null);
+
+    for (var i = 0; i < menuItems.length; i++) {
+        var item = menuItems[i];
+        if (item.dataset.section === section) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    }
+
+    switch (section) {
+        case 'stories':
+            renderStoryList();
+            break;
+        case 'photos':
+            renderPhotos();
+            break;
+        case 'psychology':
+            renderPsychology();
+            break;
+        case 'documentary':
+            renderDocumentary();
+            break;
+        case 'yearbook':
+            renderYearbook();
+            break;
+        case 'essays':
+            renderEssays();
+            break;
+
+    }
+}
+
+/* ===== 更新子菜单高亮 ===== */
+function updateSubmenuActive(branchKey) {
+    for (var i = 0; i < submenuItems.length; i++) {
+        var item = submenuItems[i];
+        if (item.dataset.branch === branchKey) {
+            item.classList.add('active-branch');
+        } else {
+            item.classList.remove('active-branch');
+        }
+    }
+}
+
+/* ================================================ */
+/* ===== 搜索功能 ===== */
+/* ================================================ */
+function performSearch(query) {
+    state.searchQuery = query;
+    if (state.currentSection !== 'stories') {
+        switchSection('stories');
+        setTimeout(function() { performSearch(query); }, 50);
+        return;
+    }
+
+    if (!query) {
+        renderStoryList({ branch: state.currentBranch });
+        return;
+    }
+
+    renderStoryList({ branch: state.currentBranch, query: query });
+}
+
+function showSuggestions(query) {
+    if (!query || state.currentSection !== 'stories') {
+        hideSuggestions();
+        return;
+    }
+
+    var q = query.toLowerCase();
+    var allStories = flattenStories();
+    var matches = [];
+    for (var i = 0; i < allStories.length; i++) {
+        var s = allStories[i];
+        if (s.title.toLowerCase().includes(q) ||
+            (s.content && s.content.toLowerCase().includes(q))) {
+            matches.push(s);
+        }
+    }
+
+    var container = document.querySelector('.search-suggestions');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'search-suggestions';
+        document.querySelector('.search-container').appendChild(container);
+    }
+
+    if (matches.length === 0) {
+        container.innerHTML = '<div class="search-no-result">没有找到匹配结果</div>';
+        container.classList.add('active');
+        return;
+    }
+
+    var maxShow = 8;
+    var itemsHtml = '';
+    var escapedQ = escapeRegExp(q);
+    var regex = new RegExp(escapedQ, 'gi');
+
+    for (var i = 0; i < Math.min(matches.length, maxShow); i++) {
+        var s = matches[i];
+        var catName = getCategoryName(s._category);
+        var highlightedTitle = s.title.replace(regex, function(match) {
+            return '<span class="highlight">' + match + '</span>';
+        });
+        itemsHtml += '<div class="search-suggestion-item" data-id="' + s.id + '" data-branch="' + s._category + '">';
+        itemsHtml += highlightedTitle;
+        if (catName) {
+            itemsHtml += ' <span class="search-suggestion-tag">' + catName + '</span>';
+        }
+        itemsHtml += '</div>';
+    }
+
+    if (matches.length > maxShow) {
+        container.innerHTML = itemsHtml + '<div class="search-no-result">还有 ' + (matches.length - maxShow) + ' 个结果……</div>';
+    } else {
+        container.innerHTML = itemsHtml;
+    }
+
+    container.classList.add('active');
+
+    var items = container.querySelectorAll('.search-suggestion-item');
+    for (var i = 0; i < items.length; i++) {
+        (function(el) {
+            el.addEventListener('click', function() {
+                hideSuggestions();
+                searchInput.value = '';
+                searchClear.classList.remove('visible');
+                state.searchQuery = '';
+                renderStoryDetail(el.dataset.id, el.dataset.branch);
+            });
+        })(items[i]);
+    }
+}
+
+function hideSuggestions() {
+    var el = document.querySelector('.search-suggestions');
+    if (el) el.classList.remove('active');
+}
+
+/* ================================================ */
+/* ===== 事件绑定 ===== */
+/* ================================================ */
+
+// 菜单点击
+for (var i = 0; i < menuItems.length; i++) {
+    (function(item) {
+        item.addEventListener('click', function(e) {
+            // 点击高中故事本身不触发子菜单
+            switchSection(item.dataset.section);
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('open');
+            }
+        });
+    })(menuItems[i]);
+}
+
+// 子菜单点击（分支切换）
+for (var i = 0; i < submenuItems.length; i++) {
+    (function(item) {
+        item.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var branch = item.dataset.branch;
+            state.currentBranch = branch;
+            state.searchQuery = '';
+            searchInput.value = '';
+            searchClear.classList.remove('visible');
+            hideSuggestions();
+
+            // 切换到高中故事板块
+            switchSection('stories');
+            // 分支切换：等 switchSection 重置了 state.currentBranch，重新设回去
+            state.currentBranch = branch;
+            updateSubmenuActive(branch);
+            renderStoryList({ branch: branch });
+        });
+    })(submenuItems[i]);
+}
+
+// 搜索输入
+var searchTimer;
+searchInput.addEventListener('input', function() {
+    var val = searchInput.value.trim();
+    if (val.length > 0) {
+        searchClear.classList.add('visible');
+    } else {
+        searchClear.classList.remove('visible');
+    }
+
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(function() {
+        if (val) {
+            showSuggestions(val);
+            performSearch(val);
+        } else {
+            hideSuggestions();
+            performSearch('');
+        }
+    }, 100);
+});
+
+// 搜索回车
+searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        hideSuggestions();
+        var val = searchInput.value.trim();
+        performSearch(val);
+    }
+});
+
+// 搜索清空
+searchClear.addEventListener('click', function() {
+    searchInput.value = '';
+    searchClear.classList.remove('visible');
+    hideSuggestions();
+    performSearch('');
+    searchInput.focus();
+});
+
+// 点击外部关闭搜索建议
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.search-container')) {
+        hideSuggestions();
+    }
+});
+
+// 移动端菜单开关
+menuToggle.addEventListener('click', function() {
+    sidebar.classList.toggle('open');
+});
+
+// ESC 关闭
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        hideSuggestions();
+        searchInput.blur();
+    }
+});
+
+/* ===== 启动 ===== */
+switchSection('stories');
+
+console.log('📖 三年记忆 · 高中纪念网站已加载');
+var total = flattenStories().length;
+console.log('📚 共 ' + total + ' 个故事');
+
+/* ===== 学姐高三纪录片 ===== */
+function renderDocumentary() {
+    var imgPath = '学姐高三纪录片.jpg';
+
+    content.innerHTML =
+        '<div class="section-header">' +
+        '<h1>🎬 学姐高三纪录片</h1>' +
+        '<p>海报中的二维码可以扫码观看</p>' +
+        '</div>' +
+        '<div class="documentary-viewer">' +
+        '<div class="documentary-image-wrapper">' +
+        '<img class="documentary-image" src="' + imgPath + '" alt="学姐高三纪录片海报" id="docImg">' +
+        '</div>' +
+        '</div>';
+}
+
+/* ===== 2026高中毕业纪念册（占位） ===== */
+function renderYearbook() {
+    content.innerHTML =
+        '<div class="pdf-viewer">' +
+        '<div class="pdf-header">' +
+        '<h1>📕 2026高中毕业纪念册</h1>' +
+        '<p>共28页 | 已旋转为横版浏览</p>' +
+        '<p class="scan-notice">以下均为手机扫描而成的pdf，比较粗糙，如需细致观看，请回归纸质版</p>' +
+        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
+        '</div>' +
+        '<div class="pdf-embed-wrapper">' +
+        '<iframe class="pdf-embed" src="2026高中毕业纪念册.pdf" title="毕业纪念册"></iframe>' +
+        '</div>' +
+        '</div>';
+}
+
+/* ===== 高一作文集 ===== */
+function renderEssays() {
+    content.innerHTML =
+        '<div class="pdf-viewer">' +
+        '<div class="pdf-header">' +
+        '<h1>📝 高一作文集</h1>' +
+        '<p>共36页</p>' +
+        '<p class="scan-notice">以下均为手机扫描而成的pdf，比较粗糙，如需细致观看，请回归纸质版</p>' +
+        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
+        '</div>' +
+        '<div class="pdf-embed-wrapper">' +
+        '<iframe class="pdf-embed" src="高一作文集.pdf" title="高一作文集"></iframe>' +
+        '</div>' +
+        '</div>';
+}
+

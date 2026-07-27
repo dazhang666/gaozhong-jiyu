@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三年记忆 · 高中纪念</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- 左侧菜单栏 -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>三年记忆</h2>
+        </div>
+        <ul class="sidebar-menu">
+            <li class="menu-item active" data-section="stories">
+                <span class="menu-icon">📖</span>
+                <span>高中故事</span>
+                <span class="submenu-arrow">▸</span>
+                <ul class="submenu">
+                    <li class="submenu-item" data-branch="memes">💬 名梗</li>
+                    <li class="submenu-item" data-branch="nicknames">🏷️ 外号</li>
+                    <li class="submenu-item" data-branch="fun">🎉 趣事</li>
+                </ul>
+            </li>
+            <li class="menu-item" data-section="photos">
+                <span class="menu-icon">📸</span>
+                <span>高中纪念照</span>
+            </li>
+           <li class="menu-item" data-section="psychology">
+               <span class="menu-icon">📓</span>
+               <span>心理本</span>
+           </li>
+            <li class="menu-item" data-section="documentary">
+                <span class="menu-icon">🎬</span>
+                <span>学姐高三纪录片</span>
+            </li>
+            <li class="menu-item" data-section="yearbook">
+                <span class="menu-icon">📕</span>
+                <span>2026高中毕业纪念册</span>
+            </li>
+            <li class="menu-item" data-section="essays">
+                <span class="menu-icon">📝</span>
+                <span>高一作文集</span>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>致我们共同的高中时光</p>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <div class="main-wrapper">
+        <!-- 顶部搜索栏 -->
+        <header class="top-bar">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" id="searchInput" placeholder="检索高中名梗外号趣事">
+                <button class="search-clear" id="searchClear">✕</button>
+            </div>
+        </header>
+
+        <!-- 内容区 -->
+        <main class="content" id="mainContent">
+            <!-- 内容由JS动态渲染 -->
+        </main>
+    </div>
+
+    <!-- 移动端菜单按钮 -->
+    <button class="menu-toggle" id="menuToggle">☰</button>
+
+    <script src="data/stories.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
