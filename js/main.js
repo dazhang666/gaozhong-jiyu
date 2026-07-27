@@ -299,19 +299,75 @@ function openLightbox(photos, startIndex) {
     });
 }
 
-/* ===== 心理本（占位） ===== */
+
+
+/* ===== 通用翻页阅读器 ===== */
+function renderBookViewer(title, icon, desc, pageDir, totalPages) {
+    var currentPage = 1;
+
+    function buildViewer(pn) {
+        var prevD = pn <= 1 ? " disabled" : "";
+        var nextD = pn >= totalPages ? " disabled" : "";
+        var html = "";
+        html += "<div class=\"book-viewer\">";
+        html += "<div class=\"book-header\">";
+        html += "<h1>" + icon + " " + title + "</h1>";
+        html += "<p>" + desc + "</p>";
+        html += '<p class="load-notice">图片正在加载，请耐心等待</p>';
+        html += "</div>";
+        html += "<div class=\"book-body\">";
+        html += "<button class=\"book-nav book-prev\" id=\"bkPrev\"" + prevD + ">‹</button>";
+        html += "<div class=\"book-page-wrapper\">";
+        html += "<img class=\"book-page\" id=\"bkImg\" src=\"" + pageDir + "/page_" + String(pn).padStart(3, "0") + ".jpg\" alt=\"第" + pn + "页\">";
+        html += "<div class=\"book-page-num\">" + pn + " / " + totalPages + "</div>";
+        html += "</div>";
+        html += "<button class=\"book-nav book-next\" id=\"bkNext\"" + nextD + ">›</button>";
+        html += "</div>";
+        html += "</div>";
+        return html;
+    }
+
+    content.innerHTML = buildViewer(currentPage);
+
+    function goToPage(n) {
+        if (n < 1 || n > totalPages) return;
+        currentPage = n;
+        var img = document.getElementById("bkImg");
+        if (img) {
+            img.style.opacity = "0";
+            setTimeout(function() {
+                img.src = pageDir + "/page_" + String(n).padStart(3, "0") + ".jpg";
+                img.style.opacity = "1";
+                var p = document.getElementById("bkPrev");
+                var nx = document.getElementById("bkNext");
+                if (p) p.disabled = n <= 1;
+                if (nx) nx.disabled = n >= totalPages;
+                var num = document.querySelector(".book-page-num");
+                if (num) num.textContent = n + " / " + totalPages;
+            }, 150);
+        }
+    }
+
+    setTimeout(function() {
+        var pBtn = document.getElementById("bkPrev");
+        var nBtn = document.getElementById("bkNext");
+        if (pBtn) pBtn.addEventListener("click", function() { goToPage(currentPage - 1); });
+        if (nBtn) nBtn.addEventListener("click", function() { goToPage(currentPage + 1); });
+    }, 50);
+
+    function keyH(e) {
+        if (state.currentSection === "psychology" || state.currentSection === "yearbook" || state.currentSection === "essays") {
+            if (e.key === "ArrowLeft") goToPage(currentPage - 1);
+            if (e.key === "ArrowRight") goToPage(currentPage + 1);
+        }
+    }
+    if (window._bkKeyHandler) document.removeEventListener("keydown", window._bkKeyHandler);
+    window._bkKeyHandler = keyH;
+    document.addEventListener("keydown", keyH);
+}
+/* ===== 心理本 ===== */
 function renderPsychology() {
-    content.innerHTML =
-        '<div class="pdf-viewer">' +
-        '<div class="pdf-header">' +
-        '<h1>📓 心理本</h1>' +
-        '<p>我们的心理课堂记忆</p>' +
-        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
-        '</div>' +
-        '<div class="pdf-embed-wrapper">' +
-        '<iframe class="pdf-embed" src="心理本.pdf" title="心理本"></iframe>' +
-        '</div>' +
-        '</div>';
+    renderBookViewer("心理本", "📓", "我们的心理课堂记忆", "pages_psych", 168);
 }
 
 /* ================================================ */
@@ -587,35 +643,13 @@ function renderDocumentary() {
         '</div>';
 }
 
-/* ===== 2026高中毕业纪念册（占位） ===== */
+/* ===== 2026高中毕业纪念册 ===== */
 function renderYearbook() {
-    content.innerHTML =
-        '<div class="pdf-viewer">' +
-        '<div class="pdf-header">' +
-        '<h1>📕 2026高中毕业纪念册</h1>' +
-        '<p>共28页 | 已旋转为横版浏览</p>' +
-        '<p class="scan-notice">以下均为手机扫描而成的pdf，比较粗糙，如需细致观看，请回归纸质版</p>' +
-        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
-        '</div>' +
-        '<div class="pdf-embed-wrapper">' +
-        '<iframe class="pdf-embed" src="2026高中毕业纪念册.pdf" title="毕业纪念册"></iframe>' +
-        '</div>' +
-        '</div>';
+    renderBookViewer("2026高中毕业纪念册", "📕", "共28页 | 已旋转为横版浏览", "pages_yearbook", 28);
 }
 
 /* ===== 高一作文集 ===== */
 function renderEssays() {
-    content.innerHTML =
-        '<div class="pdf-viewer">' +
-        '<div class="pdf-header">' +
-        '<h1>📝 高一作文集</h1>' +
-        '<p>共36页</p>' +
-        '<p class="scan-notice">以下均为手机扫描而成的pdf，比较粗糙，如需细致观看，请回归纸质版</p>' +
-        '<p class="load-notice">pdf文件较大，我也没有压缩，请耐心等待加载</p>' +
-        '</div>' +
-        '<div class="pdf-embed-wrapper">' +
-        '<iframe class="pdf-embed" src="高一作文集.pdf" title="高一作文集"></iframe>' +
-        '</div>' +
-        '</div>';
+    renderBookViewer("高一作文集", "📝", "共36页", "pages_essays", 36);
 }
 
