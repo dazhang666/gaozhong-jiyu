@@ -28,8 +28,8 @@ var storiesData = {
             { "id": "nick-1", "title": "黑哥、猴哥", "content": "李荣轩。当时黑神话悟空兴起，那天返校时候，黑哥压轴到场，头发蓬松，班长喊了一句“黑神话悟空”，结合之前猴哥的外号就有了黑哥。" },
             { "id": "nick-2", "title": "六子", "content": "张庆泽。" },
             { "id": "nick-3", "title": "大便", "content": "崔柏胜。" },
-            { "id": "nick-4", "title": "博哥", "content": "王泽汉。大便起的，原因少儿不宜。" },
-            { "id": "nick-5", "title": "豆哥", "content": "刘子木。大象起的。" },
+            { "id": "nick-4", "title": "博哥", "content": "王泽汉。局长起的，原因少儿不宜。" },
+            { "id": "nick-5", "title": "豆哥", "content": "刘子木。局长起的。" },
             { "id": "nick-6", "title": "老兵", "content": "刘佳裕。" },
             { "id": "nick-7", "title": "大象", "content": "王宗瑞。" },
             { "id": "nick-8", "title": "熊猫", "content": "刘子杨。" },
@@ -52,7 +52,8 @@ var storiesData = {
             { "id": "nick-25", "title": "刀哥、土豆", "content": "恩师张悦。" },
             { "id": "nick-26", "title": "学生家长", "content": "出自老头，形容韩多米与童乐岩之母。" },
             { "id": "nick-27", "title": "黑的", "content": "指肖金亮，出自老头。" },
-            { "id": "nick-28", "title": "老头偶像", "content": "王牧歌。" }
+            { "id": "nick-28", "title": "老头偶像", "content": "王牧歌。" },
+            { "id": "nick-29", "title": "局长", "content": "高铭睿。" }
         ]
     },
     "fun": {
