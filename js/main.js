@@ -141,6 +141,7 @@ function renderStoryList(opts) {
             state.currentBranch = null;
             updateSubmenuActive(null);
             renderStoryList();
+            setTimeout(function() { window.scrollTo(0, savedScrollPos); }, 50);
         });
     }
 
@@ -158,7 +159,10 @@ function renderStoryList(opts) {
 /* ================================================ */
 /* ===== 渲染：故事详情 ===== */
 /* ================================================ */
+var savedScrollPos = 0;
 function renderStoryDetail(storyId, branchKey) {
+    savedScrollPos = window.scrollY || document.documentElement.scrollTop || 0;
+    
     var cat = categories[branchKey];
     if (!cat) return;
 
@@ -192,6 +196,7 @@ function renderStoryDetail(storyId, branchKey) {
         } else {
             renderStoryList();
         }
+        setTimeout(function() { window.scrollTo(0, savedScrollPos); }, 50);
     });
 }
 
