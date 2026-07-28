@@ -399,6 +399,97 @@ function renderEditor() {
         '</div>';
 }
 
+
+
+/* ===== 来时路数据 ===== */
+var lailuData = {
+    "grade10-1": {
+        "name": "高一上",
+        "names": [
+            "马岩","苗润晨","迟毓晗","张莫静","庞雨晴","崔丽慧","高跃","周晨",
+            "蔺意曈","张健依","张莫野","卞悦言","高湛","李欣颖","景子一","宁思晴",
+            "陈希","王紫诺","运东佳","李恩惠","岳洋","王思童","高艺丹","刘晓妍",
+            "张艺凡","于栗宇","孙晨轩","韩多米","崔柏胜","韩壮","刘子木","郑茗元",
+            "张庆泽","阎宝宇","高铭睿","汪鑫","李荣轩","岳一繁","王泽汉","刘嘉裕",
+            "王宗瑞","林佳明","童乐岩","王牧歌","李檬汐","李佳兴","刘相","刘运泽",
+            "赵子铭","肖琳议"
+        ]
+    },
+    "grade10-2": {
+        "name": "高一下",
+        "names": [
+            "高跃","王紫诺","苗润晨","马岩","迟毓晗","张莫静","崔丽慧","张莫野",
+            "卞悦言","周晨","陈希","刘欣宜","高艺丹","丁梓芯","运东佳","邓惜文",
+            "张艺凡","孙晨轩","韩壮","汪鑫","于栗宇","张庆泽","刘相","高铭睿",
+            "岳一繁","韩多米","李荣轩","王牧歌","肖金亮","阎宝玉","赵达","李檬汐",
+            "林佳明","刘运泽","刘佳裕","宋鑫博","杨瑞丰","刘子杨","童乐岩","于哲",
+            "于昊然","崔柏胜","尚佳民","王钦宇","陈子俊","王宗瑞","郑茗元","刘子木","王泽汉"
+        ]
+    },
+    "grade11-1": { "name": "高二上", "names": ["（待补充）"] },
+    "grade11-2": { "name": "高二下", "names": ["（待补充）"] },
+    "grade12-1": { "name": "高三上", "names": ["（待补充）"] },
+    "grade12-2": { "name": "高三下", "names": ["（待补充）"] }
+};
+
+/* ===== 来时路 ===== */
+function renderLailu() {
+    var html = "";
+    html += "<div class=\"section-header\">";
+    html += "<h1>🛤️ 来时路</h1>";
+    html += "<p>那些年坐在同一间教室里的人</p>";
+    html += "</div>";
+    html += "<div class=\"branch-grid\">";
+
+    var keys = ["grade10-1","grade10-2","grade11-1","grade11-2","grade12-1","grade12-2"];
+    for (var i = 0; i < keys.length; i++) {
+        var g = lailuData[keys[i]];
+        var count = g.names ? g.names.length : 0;
+        html += "<div class=\"branch-card\" data-lailu=\"" + keys[i] + "\">";
+        html += "<div class=\"branch-icon\">📚</div>";
+        html += "<h3 class=\"branch-name\">" + g.name + "</h3>";
+        html += "<span class=\"branch-count\">" + count + " 人</span>";
+        html += "</div>";
+    }
+
+    html += "</div>";
+    content.innerHTML = html;
+
+    var cards = content.querySelectorAll(".branch-card");
+    for (var i = 0; i < cards.length; i++) {
+        (function(el) {
+            el.addEventListener("click", function() {
+                renderLailuGrade(el.dataset.lailu);
+            });
+        })(cards[i]);
+    }
+}
+
+/* ===== 来时路 - 年级详情 ===== */
+function renderLailuGrade(gradeKey) {
+    var g = lailuData[gradeKey];
+    if (!g) return;
+
+    var html = "";
+    html += "<div class=\"section-header\">";
+    html += "<button class=\"back-link\" id=\"backLailu\">← 全部</button>";
+    html += "<h1>📚 " + g.name + "</h1>";
+    html += "<p>共 " + g.names.length + " 人</p>";
+    html += "</div>";
+    html += "<div class=\"namelist\">";
+
+    for (var i = 0; i < g.names.length; i++) {
+        html += "<span class=\"namelist-item\">" + g.names[i] + "</span>";
+    }
+
+    html += "</div>";
+    content.innerHTML = html;
+
+    document.getElementById("backLailu").addEventListener("click", function() {
+        renderLailu();
+    });
+}
+
 /* ================================================ */
 /* ===== 切换板块 ===== */
 /* ================================================ */
@@ -438,6 +529,9 @@ function switchSection(section) {
             break;
         case 'essays':
             renderEssays();
+            break;
+        case 'lailu':
+            renderLailu();
             break;
         case 'editor':
             renderEditor();
