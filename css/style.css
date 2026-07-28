@@ -1145,3 +1145,36 @@ body {
     }
 }
 @@
+
+/* ===== 名字列表 ===== */
+.namelist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    animation: fadeIn 0.3s ease;
+    padding: 4px 0;
+}
+
+.namelist-item {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: var(--text);
+    transition: all 0.15s;
+    cursor: default;
+}
+
+.namelist-item:hover {
+    border-color: var(--primary-light);
+    background: rgba(91, 110, 140, 0.05);
+}
+
+@media (max-width: 768px) {
+    .namelist-item {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
