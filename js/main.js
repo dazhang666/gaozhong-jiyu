@@ -709,7 +709,7 @@ for (var i = 0; i < menuItems.length; i++) {
     })(menuItems[i]);
 }
 
-// 子菜单点击（分支切换）
+// 子菜单点击（高中故事分支）
 for (var i = 0; i < submenuItems.length; i++) {
     (function(item) {
         item.addEventListener('click', function(e) {
@@ -723,13 +723,28 @@ for (var i = 0; i < submenuItems.length; i++) {
 
             // 切换到高中故事板块
             switchSection('stories');
-            // 分支切换：等 switchSection 重置了 state.currentBranch，重新设回去
             state.currentBranch = branch;
             updateSubmenuActive(branch);
             renderStoryList({ branch: branch });
         });
     })(submenuItems[i]);
 }
+
+// 来时路子菜单点击
+document.querySelectorAll('[data-lailu]').forEach(function(item) {
+    item.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var gradeKey = item.dataset.lailu;
+        // 切换到来时路板块
+        if (state.currentSection !== 'lailu') {
+            switchSection('lailu');
+            // 用 setTimeout 等 DOM 渲染完再跳转
+            setTimeout(function() { renderLailuGrade(gradeKey); }, 50);
+        } else {
+            renderLailuGrade(gradeKey);
+        }
+    });
+});
 
 // 搜索输入
 var searchTimer;
